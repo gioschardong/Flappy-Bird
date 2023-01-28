@@ -1,6 +1,6 @@
 # Flappy-Bird
 
-![](./screenshot.png)
+![](./Screenshot.png)
 
 
 ## Objetivo
