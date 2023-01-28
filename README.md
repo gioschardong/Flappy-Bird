@@ -1,7 +1,4 @@
 # Flappy-Bird
-Esse Projeto é uma versão do jogo Flappy Bird, desenvolvido em Python, utilizando a biblioteca Pygame.
-
-# Flappy-Bird
 
 ![](./screenshot.png)
 
