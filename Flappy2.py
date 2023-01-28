@@ -6,55 +6,55 @@ pygame.init()
 clock = pygame.time.Clock()
 
 # Tela
-win_height = 720
-win_width = 551
-window = pygame.display.set_mode((win_width, win_height))
+altura_janela = 720
+largura_janela = 551
+janela = pygame.display.set_mode((largura_janela, altura_janela))
 
 # Imagens
-bird_images = [pygame.image.load("assets/bird_down.png"),
-               pygame.image.load("assets/bird_mid.png"),
-               pygame.image.load("assets/bird_up.png")]
+passaro_imgs = [pygame.image.load("assets/bird_down.png"),
+                pygame.image.load("assets/bird_mid.png"),
+                pygame.image.load("assets/bird_up.png")]
 
-skyline_image = pygame.image.load("assets/background.png")
+ceu_img = pygame.image.load("assets/background.png")
 
-ground_image = pygame.image.load("assets/ground.png")
+chao_img = pygame.image.load("assets/ground.png")
 
-top_pipe_image = pygame.image.load("assets/pipe_top.png")
+topo_cano_img = pygame.image.load("assets/pipe_top.png")
 
-bottom_pipe_image = pygame.image.load("assets/pipe_bottom.png")
+base_cano_img = pygame.image.load("assets/pipe_bottom.png")
 
-game_over_image = pygame.image.load("assets/game_over.png")
+game_over_img = pygame.image.load("assets/game_over.png")
 
-start_image = pygame.image.load("assets/start.png")
+start_img = pygame.image.load("assets/start.png")
 
 # Game
-scroll_speed = 1
-bird_start_position = (100, 250)
+velocidade_scroll = 1
+posicao_inicial_passaro = (100, 250)
 score = 0
-font = pygame.font.SysFont('Segoe', 26)
-game_stopped = True
+font = pygame.font.SysFont('arial black', 26)
+parar_jogo = True
 
 
-class Bird(pygame.sprite.Sprite):
+class Passaro(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = bird_images[0]
+        self.image = passaro_imgs[0]
         self.rect = self.image.get_rect()
-        self.rect.center = bird_start_position
+        self.rect.center = posicao_inicial_passaro
         self.image_index = 0
         self.vel = 0
         self.flap = False
         self.alive = True
 
     def update(self, user_input):
-        # Animate Bird
+        # Animação Passaro
         if self.alive:
             self.image_index += 1
         if self.image_index >= 30:
             self.image_index = 0
-        self.image = bird_images[self.image_index // 10]
+        self.image = passaro_imgs[self.image_index // 10]
 
-        # Gravity and Flap
+        # Gravidade e Flaps
         self.vel += 0.5
         if self.vel > 7:
             self.vel = 7
@@ -63,16 +63,16 @@ class Bird(pygame.sprite.Sprite):
         if self.vel == 0:
             self.flap = False
 
-        # Rotate Bird
+        # Rotação Passaro
         self.image = pygame.transform.rotate(self.image, self.vel * -7)
 
-        # User Input
+        # Interação do Usuário
         if user_input[pygame.K_SPACE] and not self.flap and self.rect.y > 0 and self.alive:
             self.flap = True
             self.vel = -7
 
 
-class Pipe(pygame.sprite.Sprite):
+class Cano(pygame.sprite.Sprite):
     def __init__(self, x, y, image, pipe_type):
         pygame.sprite.Sprite.__init__(self)
         self.image = image
@@ -82,17 +82,17 @@ class Pipe(pygame.sprite.Sprite):
         self.pipe_type = pipe_type
 
     def update(self):
-        # Move Pipe
-        self.rect.x -= scroll_speed
-        if self.rect.x <= -win_width:
+        # Movimentação dos canos
+        self.rect.x -= velocidade_scroll
+        if self.rect.x <= -largura_janela:
             self.kill()
 
-        # Score
+        # Pontos
         global score
         if self.pipe_type == 'bottom':
-            if bird_start_position[0] > self.rect.topleft[0] and not self.passed:
+            if posicao_inicial_passaro[0] > self.rect.topleft[0] and not self.passed:
                 self.enter = True
-            if bird_start_position[0] > self.rect.topright[0] and not self.passed:
+            if posicao_inicial_passaro[0] > self.rect.topright[0] and not self.passed:
                 self.exit = True
             if self.enter and self.exit and not self.passed:
                 self.passed = True
@@ -102,14 +102,14 @@ class Pipe(pygame.sprite.Sprite):
 class Ground(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-        self.image = ground_image
+        self.image = chao_img
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = x, y
 
     def update(self):
-        # Move Ground
-        self.rect.x -= scroll_speed
-        if self.rect.x <= -win_width:
+        # Movimentação do Chão
+        self.rect.x -= velocidade_scroll
+        if self.rect.x <= -largura_janela:
             self.kill()
 
 
@@ -125,54 +125,54 @@ def quit_game():
 def main():
     global score
 
-    # Instantiate Bird
+    # Inicializar Passaro
     bird = pygame.sprite.GroupSingle()
-    bird.add(Bird())
+    bird.add(Passaro())
 
-    # Setup Pipes
+    # Set Canos
     pipe_timer = 0
     pipes = pygame.sprite.Group()
 
-    # Instantiate Initial Ground
+    # Inicializar chão
     x_pos_ground, y_pos_ground = 0, 520
     ground = pygame.sprite.Group()
     ground.add(Ground(x_pos_ground, y_pos_ground))
 
     run = True
     while run:
-        # Quit
+        # Sair
         quit_game()
 
         # Reset Frame
-        window.fill((0, 0, 0))
+        janela.fill((0, 0, 0))
 
-        # User Input
+        # Interação Usuário
         user_input = pygame.key.get_pressed()
 
-        # Draw Background
-        window.blit(skyline_image, (0, 0))
+        # Desenhar Background
+        janela.blit(ceu_img, (0, 0))
 
         # Spawn Ground
         if len(ground) <= 2:
-            ground.add(Ground(win_width, y_pos_ground))
+            ground.add(Ground(largura_janela, y_pos_ground))
 
-        # Draw - Pipes, Ground and Bird
-        pipes.draw(window)
-        ground.draw(window)
-        bird.draw(window)
+        # Desenhar - Canos / Passaro / Chão
+        pipes.draw(janela)
+        ground.draw(janela)
+        bird.draw(janela)
 
-        # Show Score
+        # Mostrar Pontos
         score_text = font.render(
             'Score: ' + str(score), True, pygame.Color(255, 255, 255))
-        window.blit(score_text, (20, 20))
+        janela.blit(score_text, (20, 20))
 
-        # Update - Pipes, Ground and Bird
+        # Update - Canos / Chão / Passaro
         if bird.sprite.alive:
             pipes.update()
             ground.update()
         bird.update(user_input)
 
-        # Collision Detection
+        # Detectar colisão
         collision_pipes = pygame.sprite.spritecollide(
             bird.sprites()[0], pipes, False)
         collision_ground = pygame.sprite.spritecollide(
@@ -180,8 +180,8 @@ def main():
         if collision_pipes or collision_ground:
             bird.sprite.alive = False
             if collision_ground:
-                window.blit(game_over_image, (win_width // 2 - game_over_image.get_width() // 2,
-                                              win_height // 2 - game_over_image.get_height() // 2))
+                janela.blit(game_over_img, (largura_janela // 2 - game_over_img.get_width() // 2,
+                                            altura_janela // 2 - game_over_img.get_height() // 2))
                 if user_input[pygame.K_r]:
                     score = 0
                     break
@@ -191,9 +191,9 @@ def main():
             x_top, x_bottom = 550, 550
             y_top = random.randint(-600, -480)
             y_bottom = y_top + \
-                random.randint(90, 130) + bottom_pipe_image.get_height()
-            pipes.add(Pipe(x_top, y_top, top_pipe_image, 'top'))
-            pipes.add(Pipe(x_bottom, y_bottom, bottom_pipe_image, 'bottom'))
+                random.randint(90, 130) + base_cano_img.get_height()
+            pipes.add(Cano(x_top, y_top, topo_cano_img, 'top'))
+            pipes.add(Cano(x_bottom, y_bottom, base_cano_img, 'bottom'))
             pipe_timer = random.randint(180, 250)
         pipe_timer -= 1
 
@@ -203,20 +203,20 @@ def main():
 
 # Menu
 def menu():
-    global game_stopped
+    global parar_jogo
 
-    while game_stopped:
+    while parar_jogo:
         quit_game()
 
-        # Draw Menu
-        window.fill((0, 0, 0))
-        window.blit(skyline_image, (0, 0))
-        window.blit(ground_image, Ground(0, 520))
-        window.blit(bird_images[0], (100, 250))
-        window.blit(start_image, (win_width // 2 - start_image.get_width() // 2,
-                                  win_height // 2 - start_image.get_height() // 2))
+        # Desenhar Menu
+        janela.fill((0, 0, 0))
+        janela.blit(ceu_img, (0, 0))
+        janela.blit(chao_img, Ground(0, 520))
+        janela.blit(passaro_imgs[0], (100, 250))
+        janela.blit(start_img, (largura_janela // 2 - start_img.get_width() // 2,
+                                altura_janela // 2 - start_img.get_height() // 2))
 
-        # User Input
+        # Interação Usuário
         user_input = pygame.key.get_pressed()
         if user_input[pygame.K_SPACE]:
             main()
