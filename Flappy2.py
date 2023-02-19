@@ -197,7 +197,7 @@ def main():
             pipe_timer = random.randint(180, 250)
         pipe_timer -= 1
 
-        clock.tick(120)
+        clock.tick(60)
         pygame.display.update()
 
 
